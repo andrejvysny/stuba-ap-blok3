@@ -19,6 +19,8 @@ SOCKET ConnectSocket = INVALID_SOCKET;
 HANDLE hConsole;
 COORD cursor;
 
+FILE *fw;
+
 int main() {
 
     configAndConnect();
@@ -27,21 +29,28 @@ int main() {
     SetConsoleTextAttribute(hConsole, 10);
 
 
+    if ((fw = fopen("logs.txt","w")) == NULL){
+        printf("Could not create logs file!");
+        return 1;
+    }
+
     int index = 1;
 
     while (1) {
         printf("%d. -----------------------------------------\n\n", index);
 
-        Sleep(500);
+      //  Sleep(500);
         handle(INTERACTIVE ? index : 0);
-        Sleep(1000);
+     //   Sleep(1000);
         receiveData();
-        Sleep(500);
+     //   Sleep(500);
 
         index++;
         if (terminate)
             break;
     }
+
+    fclose(fw);
 
     closesocket(ConnectSocket);
     WSACleanup();
@@ -83,7 +92,7 @@ void handle(int index) {
         case 7:{
             sendData("333222111");
             break;
-            ////TODO: split code to sides
+            //TODO: split code to sides
         }
         case 8:{
             sendData("123");
@@ -96,7 +105,7 @@ void handle(int index) {
                 i++;
             }
             printf("CIPHER:\n %s\n\n",buffer);
-            sendData("What i have to do?");
+            sendData("What di I have to do?");
             break;
         }
         case 10:{
@@ -153,7 +162,18 @@ void handle(int index) {
 }
 
 
+void logMessage(char data[],int sent){
+    if (sent){
+        fprintf(fw,"\nYou: %s",data);
+    }else{
+        fprintf(fw,"\nMorpheus: %s\n",data);
+    }
+}
+
+
+
 void display(char data[], int len, int sent) {
+    logMessage(data,sent);
     if (sent) {
         printf("(%d) You: %s\n", len, data);
     } else {

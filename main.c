@@ -11,39 +11,50 @@
 #define HOST_PORT "777"
 #define STUDENT_ID "115031"
 #define INTERACTIVE 1
+#define MIDDLE_MARGIN 6
 
 char buffer[DEFAULT_BUFLEN] = "";
 int iResult, terminate = 0;
 SOCKET ConnectSocket = INVALID_SOCKET;
 
 HANDLE hConsole;
+CONSOLE_SCREEN_BUFFER_INFO csbi;
 COORD cursor;
 
 FILE *fw;
 
 int main() {
-
     configAndConnect();
 
+    hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
     SetConsoleOutputCP(CP_UTF8);
     SetConsoleTextAttribute(hConsole, 10);
 
-
-    if ((fw = fopen("logs.txt","w")) == NULL){
+    if ((fw = fopen("logs.txt", "w")) == NULL) {
         printf("Could not create logs file!");
         return 1;
     }
 
+    cursor.Y = 3;
+
+//    char test[] = "Andrej Vyšný From grammar and spelling to style and tone, Grammarly’s suggestions are comprehensive, helping you communicate effectively and as you intend.";
+//
+//
+//    display(test, strlen(test), 1);
+//    display(test, strlen(test), 0);
+//
+//    scanf("%s", buffer);
+//
+//    return 1;
+
     int index = 1;
-
     while (1) {
-        printf("%d. -----------------------------------------\n\n", index);
-
-      //  Sleep(500);
+        //  Sleep(500);
         handle(INTERACTIVE ? index : 0);
-     //   Sleep(1000);
+        //   Sleep(1000);
         receiveData();
-     //   Sleep(500);
+        //   Sleep(500);
 
         index++;
         if (terminate)
@@ -83,74 +94,81 @@ void handle(int index) {
         case 6: {
             int val;
             for (int i = 1; i <= 5; ++i) {
-                val += STUDENT_ID[i-1] - '0';
+                val += STUDENT_ID[i - 1] - '0';
             }
-            itoa(val % (STUDENT_ID[4]-'0'), buffer, 10);
+            itoa(val % (STUDENT_ID[4] - '0'), buffer, 10);
             sendData(buffer);
             break;
         }
-        case 7:{
+        case 7: {
             sendData("333222111");
             break;
             //TODO: split code to sides
         }
-        case 8:{
+        case 8: {
             sendData("123");
             break;
         }
-        case 9:{
+        case 9: {
             int i = 0;
             while (i < 132) {
                 buffer[i] = (char) (buffer[i] ^ 55);
                 i++;
             }
-            printf("CIPHER:\n %s\n\n",buffer);
-            sendData("What di I have to do?");
+
+            i=0;
+            while (i < strlen(buffer)){
+                if (buffer[i] == '\n'){
+                    buffer[i] = ' ';
+                }
+                i++;
+            }
+            display(buffer, strlen(buffer), 1);
+            sendData("What do I have to do?");
             break;
         }
-        case 10:{
+        case 10: {
             sendData("48");
             break;
         }
-        case 11:{
+        case 11: {
             sendData("2");
             break;
         }
-        case 12:{
+        case 12: {
             sendData("E.T.");
             break;
         }
-        case 13:{
+        case 13: {
             sendData("PRIMENUMBER");
             break;
         }
-        case 14:{
+        case 14: {
             char temp[strlen(buffer)];
-            int j= 0;
+            int j = 0;
             for (int i = 0; i < strlen(buffer); ++i) {
-                if (IsPrime(i)){
-                    temp[j++]=  buffer[i-1];
+                if (IsPrime(i)) {
+                    temp[j++] = buffer[i - 1];
                 }
             }
-            temp[j]='\0';
+            temp[j] = '\0';
             sendData(temp);
             break;
         }
-        case 15:{
-            //TODO: write into files all messages
+        case 15: {
             sendData("Trinity");
             break;
         }
-        case 16:{
+        case 16: {
             sendData("half-duplex");
             break;
         }
-        case 17:{
+        case 17: {
             sendData("baud rate");
             break;
         }
         default: {
-            printf("Input:");
+            display("Input: ", strlen("Input: "), 1);
             fgets(buffer, DEFAULT_BUFLEN, stdin);
             if (buffer[0] == '!') {
                 terminate = 1;
@@ -162,23 +180,63 @@ void handle(int index) {
 }
 
 
-void logMessage(char data[],int sent){
-    if (sent){
-        fprintf(fw,"\nYou: %s",data);
-    }else{
-        fprintf(fw,"\nMorpheus: %s\n",data);
+void logMessage(char data[], int sent) {
+    if (sent) {
+        fprintf(fw, "\nYou: %s", data);
+    } else {
+        fprintf(fw, "\nMorpheus: %s\n", data);
     }
 }
 
 
+void display(char data[], int len, int left) {
 
-void display(char data[], int len, int sent) {
-    logMessage(data,sent);
-    if (sent) {
-        printf("(%d) You: %s\n", len, data);
-    } else {
-        printf("(%d) Morpheus: %s\n", len, data);
+    short int half = (short) ( (csbi.dwSize.X / 2) - 8);
+
+    int space_position, string_offset = 0;
+    for (int index = 0; index < strlen(data); index++) {
+        if (data[index] == ' ') {
+            space_position = index;
+        }
+        if (string_offset >= half - 1) {
+            data[space_position] = '\n';
+            string_offset = 0;
+        }
+        string_offset++;
     }
+
+    cursor.Y++;
+
+    if (left) {
+        int i = 0;
+        cursor.X = 0;
+        SetConsoleCursorPosition(hConsole, cursor);
+        while (data[i] != '\0') {
+            if (data[i] == '\n') {
+                cursor.Y++;
+            }
+            putchar(data[i]);
+            i++;
+        }
+    } else {
+        int i = 0;
+        short int start = (short) (half);
+        cursor.X = start;
+        SetConsoleCursorPosition(hConsole, cursor);
+        while (data[i] != '\0') {
+
+            if (data[i - 1] == '\n') {
+                cursor.Y++;
+                cursor.X = start;
+                SetConsoleCursorPosition(hConsole, cursor);
+            }
+
+            putchar(data[i]);
+            i++;
+        }
+    }
+
+    logMessage(data, left);
 }
 
 
@@ -201,10 +259,10 @@ int receiveData() {
         display(buffer, iResult, 0);
     } else if (iResult == 0) {
         printf("\n\tConnection closed\n");//v tomto pripade server ukoncil komunikaciu
-        terminate=1;
+        terminate = 1;
     } else {
         printf("\n\tRecv failed with error: %d\n", WSAGetLastError());     //ina chyba
-        terminate=1;
+        terminate = 1;
     }
     return iResult;
 }

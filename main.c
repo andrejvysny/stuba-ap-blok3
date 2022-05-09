@@ -38,15 +38,6 @@ int main() {
 
     cursor.Y = 3;
 
-//    char test[] = "Andrej Vyšný From grammar and spelling to style and tone, Grammarly’s suggestions are comprehensive, helping you communicate effectively and as you intend.";
-//
-//
-//    display(test, strlen(test), 1);
-//    display(test, strlen(test), 0);
-//
-//    scanf("%s", buffer);
-//
-//    return 1;
 
     int index = 1;
     while (1) {

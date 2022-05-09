@@ -5,8 +5,9 @@
 
 void configAndConnect();
 
-void display();
-void handle();
+void display(char data[], int len, int left);
+void handle(int index);
+void logMessage(char data[], int sent);
 
 int sendData(char data[]);
 int receiveData();

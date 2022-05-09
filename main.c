@@ -40,11 +40,11 @@ int main() {
 
     int index = 1;
     while (1) {
-        //  Sleep(500);
+        //  Sleep(250);
         handle(INTERACTIVE ? index : 0);
-        //   Sleep(1000);
-        receiveData();
         //   Sleep(500);
+        receiveData();
+        //   Sleep(250);
 
         index++;
         if (terminate)

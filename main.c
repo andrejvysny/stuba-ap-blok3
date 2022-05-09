@@ -11,7 +11,6 @@
 #define HOST_PORT "777"
 #define STUDENT_ID "115031"
 #define INTERACTIVE 1
-#define MIDDLE_MARGIN 6
 
 char buffer[DEFAULT_BUFLEN] = "";
 int iResult, terminate = 0;
@@ -94,7 +93,6 @@ void handle(int index) {
         case 7: {
             sendData("333222111");
             break;
-            //TODO: split code to sides
         }
         case 8: {
             sendData("123");
@@ -181,6 +179,7 @@ void logMessage(char data[], int sent) {
 
 
 void display(char data[], int len, int left) {
+    logMessage(data, left);
 
     short int half = (short) ( (csbi.dwSize.X / 2) - 8);
 
@@ -226,8 +225,6 @@ void display(char data[], int len, int left) {
             i++;
         }
     }
-
-    logMessage(data, left);
 }
 
 
